@@ -1,0 +1,34 @@
+version: "2"
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - gocyclo
+    - ineffassign
+    - misspell
+    - revive
+
+  settings:
+    gocyclo:
+      # Flag functions with cyclomatic complexity > 14.
+      # min-complexity is the lowest value that gets reported, so 15 enforces ≤ 14.
+      min-complexity: 15
+
+    revive:
+      rules:
+        - name: exported
+          severity: warning
+
+  exclusions:
+    rules:
+      # Test files: relax errcheck and complexity — test helpers often chain
+      # calls and assertions without explicit error propagation.
+      - linters: [errcheck, gocyclo]
+        path: "_test\\.go"
+
+formatters:
+  enable:
+    - gofmt
+    - goimports

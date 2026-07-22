@@ -1,0 +1,36 @@
+# go-semantic-release configuration for repometa.
+#
+# repometa is a Go library — consumers pull it via `go get` and rely on
+# semver tags to select versions. This pipeline analyzes conventional
+# commits on main, computes the next semantic version, writes CHANGELOG.md
+# and VERSION, pushes the git tag (e.g. v0.2.0), and creates the matching
+# GitHub Release. No binary distribution — the tag itself is the artifact
+# that `go get` resolves.
+
+release_mode: repo
+tag_format: "v{{.Version}}"
+
+branches:
+  - name: main
+    is_default: true
+  - name: beta
+    prerelease: true
+    channel: beta
+  - name: alpha
+    prerelease: true
+    channel: alpha
+
+prepare:
+  changelog_file: CHANGELOG.md
+  version_file: VERSION
+
+# Library repo has no binaries to attach — let semantic-release own the
+# GitHub Release so consumers can read changelog notes on the tag page.
+github:
+  create_release: true
+  owner: jedi-knights
+  repo: repometa
+
+git_author:
+  name: semantic-release-bot
+  email: semantic-release-bot@users.noreply.github.com
