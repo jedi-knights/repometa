@@ -15,11 +15,21 @@ import (
 	"strings"
 )
 
-// Scan walks root and returns a Manifest describing every detected
+// Scan walks root and returns a [Manifest] describing every detected
 // component. The returned Manifest is non-nil on success.
 //
-// Precondition: root must be an existing directory. The walk is bounded
-// by the caps documented on Option constructors.
+// The walk is bounded by the caps documented on [WithMaxDepth],
+// [WithMaxDirs], and [WithMaxFileSize]; a caller who overrides none of
+// them accepts the package defaults. Symlinks and a hardcoded skip list
+// (.git, node_modules, vendor, target, dist, build, .next, .angular,
+// .venv) are never traversed.
+//
+// Scan returns an error if root is empty, does not exist, or is not a
+// directory. Errors surfaced by the underlying filesystem walk are
+// wrapped and returned as-is; there are no exported sentinel errors.
+//
+// Scan is safe for concurrent use: it holds no package-level state and
+// mutates only the Manifest it returns.
 func Scan(root string, opts ...Option) (*Manifest, error) {
 	if root == "" {
 		return nil, errors.New("repometa: root path is empty")

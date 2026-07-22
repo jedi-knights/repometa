@@ -1,17 +1,25 @@
 package repometa
 
-// Manifest is the result of scanning a repository. Consumers are expected
-// to iterate Components; the ordering is deterministic (depth-first,
-// lexicographic within a directory) so diff-friendly serializations are
-// possible.
+// Manifest is the result of scanning a repository. Consumers iterate
+// [Manifest.Components]; the ordering is deterministic (by root path,
+// then by kind) so serialized output is diff-friendly.
 type Manifest struct {
-	Root       string
+	// Root is the absolute path that was scanned. All [Component.Root]
+	// and [Evidence.Path] values in this manifest are relative to Root.
+	Root string
+
+	// Components lists every buildable unit detected under Root. May be
+	// empty if the scan encountered no known ecosystem manifests.
 	Components []Component
-	Stats      ScanStats
+
+	// Stats reports counters from the walk. Non-zero cap-hit fields
+	// indicate the scan was truncated and may be incomplete.
+	Stats ScanStats
 }
 
-// Kind identifies the type of a Component. Values are open-ended strings
-// so new detectors can be added without breaking consumers on enum drift.
+// Kind identifies the type of a [Component]. Values are open-ended
+// strings so new detectors can be added without breaking consumers on
+// enum drift; unknown values are safe to log or ignore.
 type Kind string
 
 // Kind values for every ecosystem detector shipped in this package. See
@@ -33,32 +41,56 @@ const (
 // when more than one ecosystem's manifest is present (e.g. a Rust crate
 // with a co-located Node package).
 type Component struct {
-	Kind       Kind
-	Root       string // path relative to Manifest.Root; "." for the repo root
-	Evidence   []Evidence
-	Confidence float64 // 0.0 – 1.0; heuristic hits report < 1.0
+	// Kind identifies the ecosystem and shape of the component.
+	Kind Kind
+
+	// Root is the path relative to [Manifest.Root]; "." for the repo root.
+	Root string
+
+	// Evidence lists the files that led to this component being reported.
+	Evidence []Evidence
+
+	// Confidence is in [0.0, 1.0]; heuristic hits report < 1.0, and
+	// manifest-driven detections report 1.0.
+	Confidence float64
+
+	// Workspaces lists any monorepo layouts anchored at this component.
 	Workspaces []Workspace
+
+	// Attributes carries ecosystem-specific metadata. Keys are namespaced
+	// (e.g. "js.framework", "python.pm"). See the README for the current
+	// set; unknown keys are safe to ignore.
 	Attributes map[string]string
 }
 
-// Evidence records a single fact that led to a Component being reported.
-// Path is relative to Manifest.Root so evidence remains meaningful when
-// the manifest is transported.
+// Evidence records a single fact that led to a [Component] being
+// reported. Path is relative to [Manifest.Root] so evidence remains
+// meaningful when the manifest is transported.
 type Evidence struct {
-	Path   string
+	// Path is relative to [Manifest.Root]; forward slashes on every
+	// platform.
+	Path string
+
+	// Reason is a short human-readable description of why this file
+	// counts as evidence (e.g. "go.mod present", "workspace = [...]").
 	Reason string
 }
 
-// Workspace describes a monorepo layout anchored at a Component. Members
-// are paths (relative to Manifest.Root) of the workspace's constituent
-// packages. Members may be empty when the workspace kind was detected by
-// file presence alone (see docs on each WorkspaceKind).
+// Workspace describes a monorepo layout anchored at a [Component].
+// Members may be empty when the workspace kind was detected by file
+// presence alone rather than by parsing an explicit member list.
 type Workspace struct {
-	Kind    WorkspaceKind
+	// Kind identifies the monorepo tooling.
+	Kind WorkspaceKind
+
+	// Members lists the workspace's constituent package paths, relative
+	// to [Manifest.Root], forward-slash separated.
 	Members []string
 }
 
-// WorkspaceKind identifies the workspace / monorepo tooling in use.
+// WorkspaceKind identifies the workspace / monorepo tooling in use. Like
+// [Kind], values are open-ended strings — unknown values are safe to
+// log or ignore.
 type WorkspaceKind string
 
 // WorkspaceKind values for every workspace layout recognized by the
@@ -73,12 +105,27 @@ const (
 	WorkspaceUv        WorkspaceKind = "uv-workspace"
 )
 
-// ScanStats reports counters from the walk, useful for downstream tools
-// that want to know whether they hit a cap and should widen the scan.
+// ScanStats reports counters from the walk. Non-zero DepthCapHits or
+// DirCapHits indicate the scan was truncated by [WithMaxDepth] or
+// [WithMaxDirs] respectively — callers should widen the cap and rescan
+// if a complete manifest is required.
 type ScanStats struct {
-	DirsVisited     int
-	FilesSeen       int
-	DepthCapHits    int
-	DirCapHits      int
+	// DirsVisited is the total number of directories entered by the walk.
+	DirsVisited int
+
+	// FilesSeen is the total number of file entries observed (whether or
+	// not their contents were read).
+	FilesSeen int
+
+	// DepthCapHits counts the number of directories the walk refused to
+	// descend into because the [WithMaxDepth] cap was reached.
+	DepthCapHits int
+
+	// DirCapHits is 1 if the [WithMaxDirs] cap fired and aborted the walk;
+	// 0 otherwise.
+	DirCapHits int
+
+	// SymlinksSkipped counts the number of symlink entries skipped —
+	// symlinks are never traversed regardless of target.
 	SymlinksSkipped int
 }
