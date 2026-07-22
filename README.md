@@ -6,6 +6,8 @@ A Go library that scans a source repository and reports the components (buildabl
 ![Release](https://github.com/jedi-knights/repometa/actions/workflows/release.yml/badge.svg)
 [![Go Reference](https://pkg.go.dev/badge/github.com/jedi-knights/repometa.svg)](https://pkg.go.dev/github.com/jedi-knights/repometa)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jedi-knights/repometa)](https://goreportcard.com/report/github.com/jedi-knights/repometa)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://www.conventionalcommits.org/en/v1.0.0/)
 
 ## Table of Contents
 
@@ -14,10 +16,20 @@ A Go library that scans a source repository and reports the components (buildabl
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
+- [API Documentation](#api-documentation)
 - [Configuration](#configuration)
 - [Development](#development)
+- [Testing](#testing)
+- [Roadmap](#roadmap)
 - [Releases](#releases)
+- [Versioning](#versioning)
+- [Changelog](#changelog)
 - [Contributing](#contributing)
+- [Code of Conduct](#code-of-conduct)
+- [Security](#security)
+- [Support](#support)
+- [Acknowledgments](#acknowledgments)
+- [Maintainers](#maintainers)
 - [License](#license)
 
 ## Overview
@@ -59,6 +71,7 @@ v0 — API is unstable and will break without notice. This library exists to unb
 ## Requirements
 
 - Go 1.26 or newer (see `go.mod`).
+- No runtime dependencies beyond the Go standard library and the two transitive indirect deps listed in `go.sum` (`github.com/BurntSushi/toml`, `gopkg.in/yaml.v3`).
 
 ## Installation
 
@@ -97,6 +110,10 @@ func main() {
 }
 ```
 
+## API Documentation
+
+Full API reference is published on [pkg.go.dev](https://pkg.go.dev/github.com/jedi-knights/repometa). Every exported type, function, and option carries a godoc comment; treat pkg.go.dev as the authoritative reference and this README as an introduction.
+
 ## Configuration
 
 `Scan` accepts `Option` functions to override traversal bounds. Defaults live in `options.go`.
@@ -115,7 +132,7 @@ The walker refuses to descend into a hardcoded skip list and skips all symlinks.
 git clone https://github.com/jedi-knights/repometa.git
 cd repometa
 go mod download
-go test -race ./...
+go build ./...
 ```
 
 Lint locally (matches CI):
@@ -124,12 +141,39 @@ Lint locally (matches CI):
 golangci-lint run
 ```
 
+### Project layout
+
+- `scan.go` — entry point (`Scan`, `ScanWith`).
+- `walker.go` — bounded, symlink-safe directory traversal.
+- `detect_*.go` — one file per ecosystem detector.
+- `detectors.go` — detector registry and dispatch.
+- `manifest.go` — `Manifest`, `Component`, `Workspace` types.
+- `options.go` — traversal-bound `Option` functions and defaults.
+
+## Testing
+
+```bash
+go test -race ./...
+```
+
 Coverage report:
 
 ```bash
 go test -coverprofile=coverage.out ./...
 go tool cover -html=coverage.out
 ```
+
+CI enforces a 70% coverage floor. The floor is deliberately below the current level so a modest regression does not block merges; raise it in `.github/workflows/ci.yml` once coverage stabilizes above 80%.
+
+## Roadmap
+
+Milestones roughly correspond to detector coverage and API stability.
+
+- **v0.x** — additional detectors added on demand as consumers appear. API may break.
+- **v1.0** — API frozen once a second first-party consumer exists and stresses the shape of `Manifest`, `Component`, and `Workspace`.
+- **Post-v1** — detector plugins loaded at runtime (only if a consumer needs custom ecosystem detection).
+
+Open issues track individual detector requests. Detector requests without a concrete consumer are declined by default — see `Non-goals`.
 
 ## Releases
 
@@ -143,10 +187,52 @@ Consumers pull the tagged version via `go get github.com/jedi-knights/repometa@v
 
 Commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:` and `fix:` drive minor/patch bumps, `feat!:` or a `BREAKING CHANGE:` footer drives a major bump.
 
+## Versioning
+
+repometa follows [Semantic Versioning 2.0.0](https://semver.org/). While the library is in v0, minor version bumps may include breaking API changes — pin to an exact version in production. Once v1 ships, breaking changes will only appear in major version bumps.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md). The changelog is generated automatically from conventional commits by the release workflow — do not edit it by hand.
+
 ## Contributing
 
-Issues and pull requests are welcome at [github.com/jedi-knights/repometa](https://github.com/jedi-knights/repometa). Commit messages must follow Conventional Commits (see [Releases](#releases)) so the release pipeline can compute the next version.
+Contributions are welcome. Please open an issue before starting substantial work so the direction can be agreed on.
+
+- Fork the repository and create a topic branch from `main`.
+- Write tests for new behavior; keep coverage above the CI floor.
+- Ensure `golangci-lint run` and `go test -race ./...` pass locally.
+- Use [Conventional Commits](https://www.conventionalcommits.org/) so the release pipeline can compute the next version.
+- Open a pull request against `main` describing the change and its motivation.
+
+One PR should carry one `type(scope):` pair — split unrelated changes into separate PRs.
+
+## Code of Conduct
+
+This project follows the [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct/) v2.1. By participating, you agree to abide by its terms. Report unacceptable behavior to the maintainer at omar.crosby@gmail.com.
+
+## Security
+
+Do **not** open public issues for security vulnerabilities. Instead, email omar.crosby@gmail.com with a description of the issue and, if possible, a reproduction. You will receive an acknowledgment within 72 hours and a coordinated disclosure timeline for the fix.
+
+## Support
+
+- **Bugs and feature requests** — [open a GitHub issue](https://github.com/jedi-knights/repometa/issues).
+- **Questions and discussion** — [GitHub Discussions](https://github.com/jedi-knights/repometa/discussions).
+- **API reference** — [pkg.go.dev](https://pkg.go.dev/github.com/jedi-knights/repometa).
+
+This is a spare-time project; response times are best-effort.
+
+## Acknowledgments
+
+- [go-semantic-release](https://github.com/jedi-knights/go-semantic-release) — automates the release pipeline.
+- [golangci-lint](https://github.com/golangci/golangci-lint) — meta-linter used in CI.
+- The maintainers of each ecosystem's build-system conventions (Cargo, uv, pnpm, Turborepo, CMake, …) whose file formats this library reads.
+
+## Maintainers
+
+- [Omar Crosby](https://github.com/ocrosby) — omar.crosby@gmail.com
 
 ## License
 
-N/A — no `LICENSE` file has been added yet.
+MIT — see [LICENSE](LICENSE).
