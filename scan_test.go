@@ -72,7 +72,7 @@ version = "0.1.0"
 [tool.uv.workspace]
 members = ["packages/*"]
 `,
-		"py/uv.lock":                    "# lockfile placeholder\n",
+		"py/uv.lock":                       "# lockfile placeholder\n",
 		"py/packages/alpha/pyproject.toml": "[project]\nname = \"alpha\"\nversion = \"0.1.0\"\n",
 		"py/packages/beta/pyproject.toml":  "[project]\nname = \"beta\"\nversion = \"0.1.0\"\n",
 

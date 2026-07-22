@@ -14,6 +14,8 @@ type Manifest struct {
 // so new detectors can be added without breaking consumers on enum drift.
 type Kind string
 
+// Kind values for every ecosystem detector shipped in this package. See
+// the README's "Supported detectors" table for the mapping to ecosystem.
 const (
 	KindGoModule      Kind = "go-module"
 	KindRustCrate     Kind = "rust-crate"
@@ -59,6 +61,8 @@ type Workspace struct {
 // WorkspaceKind identifies the workspace / monorepo tooling in use.
 type WorkspaceKind string
 
+// WorkspaceKind values for every workspace layout recognized by the
+// detectors in this package.
 const (
 	WorkspaceGo        WorkspaceKind = "go-workspace"
 	WorkspaceCargo     WorkspaceKind = "cargo-workspace"
