@@ -131,6 +131,20 @@ func evidenceUnparsable(rel, filename string, err error) Evidence {
 	}
 }
 
+// readManifestOrNil returns the manifest bytes at path, or nil if
+// readManifest fails for any reason (stat failure, size cap exceeded,
+// read failure). Use it in the workspace-member parsers whose contract
+// is "best-effort: on any read failure I return an empty member list,
+// no error." Callers that need to distinguish read failures from empty
+// results should use [readManifest] directly.
+func readManifestOrNil(path string, cfg options) []byte {
+	data, err := readManifest(path, cfg)
+	if err != nil {
+		return nil
+	}
+	return data
+}
+
 // readManifest reads a file at path, capped at cfg.maxFileSize. On
 // failure it returns nil and an error explaining the reason (stat
 // failure, size cap exceeded, or read failure) so callers can attribute

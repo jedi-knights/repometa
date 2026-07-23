@@ -196,8 +196,8 @@ func detectAnt(dv dirVisit) *finding {
 // nested paths in the project tree; these are converted to "a/b" so the
 // result is directly usable as a filesystem-relative member path.
 func parseGradleIncludes(path string, cfg options) []string {
-	data, err := readManifest(path, cfg)
-	if err != nil {
+	data := readManifestOrNil(path, cfg)
+	if data == nil {
 		return nil
 	}
 	var members []string

@@ -123,8 +123,8 @@ func parseNpmYarnWorkspaces(raw json.RawMessage) ([]string, bool) {
 }
 
 func parsePnpmWorkspace(path string, cfg options) []string {
-	data, err := readManifest(path, cfg)
-	if err != nil {
+	data := readManifestOrNil(path, cfg)
+	if data == nil {
 		return nil
 	}
 	var ws pnpmWorkspaceYAML

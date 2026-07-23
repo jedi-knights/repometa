@@ -45,8 +45,8 @@ func (goDetector) detect(dv dirVisit, cfg options) []finding {
 // It handles both `use ./mod` and `use ( ... )` block forms. On any read
 // error it returns nil.
 func parseGoWorkUse(path string, cfg options) []string {
-	data, err := readManifest(path, cfg)
-	if err != nil {
+	data := readManifestOrNil(path, cfg)
+	if data == nil {
 		return nil
 	}
 	var members []string

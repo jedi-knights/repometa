@@ -85,8 +85,8 @@ func dotnetLanguageFor(ext string) string {
 // .sln paths are Windows-style with backslashes; they are normalized to
 // forward slashes for cross-platform stability.
 func parseSlnMembers(path string, cfg options) []string {
-	data, err := readManifest(path, cfg)
-	if err != nil {
+	data := readManifestOrNil(path, cfg)
+	if data == nil {
 		return nil
 	}
 	var members []string
