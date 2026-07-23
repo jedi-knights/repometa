@@ -51,7 +51,7 @@ func parseGoWorkUse(path string, cfg options) []string {
 	}
 	var members []string
 	inBlock := false
-	for _, line := range strings.Split(string(data), "\n") {
+	for line := range strings.SplitSeq(string(data), "\n") {
 		trim := strings.TrimSpace(line)
 		if trim == "" || strings.HasPrefix(trim, "//") {
 			continue
