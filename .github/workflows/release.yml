@@ -47,3 +47,52 @@ jobs:
       - uses: jedi-knights/go-semantic-release@v0
         with:
           github_token: ${{ secrets.GH_TOKEN }}
+
+      # pkg.go.dev is a read-through cache: it does not proactively
+      # re-crawl a module when a new tag is pushed, only when someone
+      # asks for that version. Left alone, the module page can display
+      # a stale version for hours after a release lands. This step
+      # nudges the Go module proxy (which pkg.go.dev crawls from) and
+      # then the pkg.go.dev fetch endpoint. It is a no-op when
+      # semantic-release did not cut a new tag.
+      - name: Refresh pkg.go.dev for new tag
+        run: |
+          set -eu
+
+          TAG=$(git tag --points-at HEAD --list 'v*' | tail -1)
+          if [ -z "$TAG" ]; then
+            echo "no v* tag at HEAD — nothing to refresh"
+            exit 0
+          fi
+
+          MODULE=$(awk '/^module / {print $2; exit}' go.mod)
+          if [ -z "$MODULE" ]; then
+            echo "::warning::could not read module path from go.mod"
+            exit 0
+          fi
+
+          PROXY_URL="https://proxy.golang.org/${MODULE}/@v/${TAG}.info"
+          echo "Refreshing pkg.go.dev for ${MODULE}@${TAG}"
+
+          # Poll the proxy up to 3 attempts with 15s backoff. GitHub's
+          # tag notification to proxy.golang.org is normally fast but not
+          # instantaneous — the first attempt after a fresh push can 404.
+          # Bound: MAX_PROXY_ATTEMPTS=3, MAX_TOTAL_WAIT_SECONDS=30.
+          for attempt in 1 2 3; do
+            if curl -sfL "$PROXY_URL" > /dev/null; then
+              echo "proxy has ${TAG} (attempt ${attempt})"
+              break
+            fi
+            if [ "$attempt" = "3" ]; then
+              echo "::warning::proxy did not see ${TAG} after 3 attempts — pkg.go.dev will pick it up eventually"
+              exit 0
+            fi
+            sleep 15
+          done
+
+          # Best-effort poke at pkg.go.dev. HTTP 408 is the expected
+          # response — the fetch is queued asynchronously and completes
+          # server-side within a few minutes. Any non-2xx is treated as
+          # informational, never as a workflow failure.
+          curl -s -o /dev/null -w "pkg.go.dev fetch: HTTP %{http_code}\n" \
+            -X POST "https://pkg.go.dev/fetch/${MODULE}@${TAG}" || true
