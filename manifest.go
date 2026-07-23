@@ -1,5 +1,7 @@
 package repometa
 
+import "slices"
+
 // Manifest is the result of scanning a repository. Consumers iterate
 // [Manifest.Components]; the ordering is deterministic (by root path,
 // then by kind) so serialized output is diff-friendly.
@@ -110,6 +112,81 @@ const (
 	WorkspaceMavenMultiModule   WorkspaceKind = "maven-multi-module"
 	WorkspaceGradleMultiProject WorkspaceKind = "gradle-multi-project"
 )
+
+// Language is a coarse ecosystem label derived from a [Component.Kind].
+// Multiple Kinds may map to the same Language: [KindRustCrate] and
+// [KindRustWorkspace] both report [LanguageRust]; [KindCMakeProject],
+// [KindMakeProject], and [KindCSource] all report [LanguageC];
+// [KindDotNetProject] and [KindDotNetSolution] both report
+// [LanguageDotNet]. This grouping is used by the helpers on [Manifest]
+// to distinguish single-language repositories from polyglot ones —
+// treat Component.Kind as the source of truth for finer-grained work.
+type Language string
+
+// Language values. LanguageUnknown is used when a Component.Kind is not
+// in the mapping table (added by a future detector; safely reported
+// rather than dropped).
+const (
+	LanguageGo         Language = "go"
+	LanguageRust       Language = "rust"
+	LanguagePython     Language = "python"
+	LanguageJavaScript Language = "javascript"
+	LanguageDotNet     Language = "dotnet"
+	LanguageJava       Language = "java"
+	LanguageC          Language = "c"
+	LanguageAssembly   Language = "assembly"
+	LanguageUnknown    Language = "unknown"
+)
+
+// Language returns the coarse ecosystem label for this Component. See
+// [Language] for the mapping and rationale; unrecognized kinds return
+// [LanguageUnknown].
+func (c Component) Language() Language {
+	switch c.Kind {
+	case KindGoModule:
+		return LanguageGo
+	case KindRustCrate, KindRustWorkspace:
+		return LanguageRust
+	case KindPythonPackage:
+		return LanguagePython
+	case KindNodePackage:
+		return LanguageJavaScript
+	case KindDotNetProject, KindDotNetSolution:
+		return LanguageDotNet
+	case KindJavaProject:
+		return LanguageJava
+	case KindCMakeProject, KindMakeProject, KindCSource:
+		return LanguageC
+	case KindAsmSource:
+		return LanguageAssembly
+	}
+	return LanguageUnknown
+}
+
+// Languages returns the sorted, de-duplicated list of [Language] values
+// present across every [Component] in the manifest. A manifest with no
+// components returns an empty slice.
+func (m *Manifest) Languages() []Language {
+	seen := make(map[Language]struct{}, len(m.Components))
+	for _, c := range m.Components {
+		seen[c.Language()] = struct{}{}
+	}
+	out := make([]Language, 0, len(seen))
+	for l := range seen {
+		out = append(out, l)
+	}
+	slices.Sort(out)
+	return out
+}
+
+// Polyglot reports whether the manifest contains components spanning
+// more than one [Language]. A manifest with zero components, or with
+// components in a single Language, returns false. [LanguageUnknown]
+// counts as its own language, so a repo mixing a known ecosystem with
+// one repometa doesn't yet recognize is reported as polyglot.
+func (m *Manifest) Polyglot() bool {
+	return len(m.Languages()) > 1
+}
 
 // ScanStats reports counters from the walk. Non-zero DepthCapHits or
 // DirCapHits indicate the scan was truncated by [WithMaxDepth] or

@@ -98,6 +98,21 @@ func main() {
 
 Full API reference is published on [pkg.go.dev](https://pkg.go.dev/github.com/jedi-knights/repometa). Every exported type, function, and option carries a godoc comment; treat pkg.go.dev as the authoritative reference and this README as an introduction.
 
+### Polyglot classification
+
+`Manifest.Languages()` returns the sorted, de-duplicated set of `Language` values across every component. `Manifest.Polyglot()` reports whether more than one language is present. `Component.Language()` exposes the same mapping per-component.
+
+```go
+manifest, _ := repometa.Scan("/path/to/repo")
+if manifest.Polyglot() {
+    fmt.Println("polyglot repo, languages:", manifest.Languages())
+} else if langs := manifest.Languages(); len(langs) == 1 {
+    fmt.Println("single-language repo:", langs[0])
+}
+```
+
+Multiple `Kind` values fold into a single `Language` when the underlying runtime is shared: `rust-crate` and `rust-workspace` both report `rust`; `dotnet-project` and `dotnet-solution` both report `dotnet`; `cmake-project`, `make-project`, and `c-source-tree` all report `c`. `Component.Kind` remains the source of truth for finer-grained inspection.
+
 ## Configuration
 
 `Scan` accepts `Option` functions to override traversal bounds. Defaults live in `options.go`.
