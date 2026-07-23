@@ -143,7 +143,7 @@ go test -coverprofile=coverage.out ./...
 go tool cover -html=coverage.out
 ```
 
-CI enforces a 70% coverage floor. The floor is deliberately below the current level so a modest regression does not block merges; raise it in `.github/workflows/ci.yml` once coverage stabilizes above 80%.
+CI enforces a 90% coverage floor. New behavior added below the line will not merge without accompanying tests.
 
 ## Roadmap
 
@@ -159,7 +159,7 @@ Open issues track individual detector requests. Detector requests without a conc
 
 Releases are automated by [go-semantic-release](https://github.com/jedi-knights/go-semantic-release). On every push to `main`:
 
-1. CI runs lint, tests, and the 70% coverage gate.
+1. CI runs lint, tests, and the 90% coverage gate.
 2. On success, the Release workflow analyzes conventional commits since the last tag.
 3. If a release is warranted, semantic-release writes `CHANGELOG.md` and `VERSION`, pushes a `vX.Y.Z` tag, and creates the matching GitHub Release.
 
