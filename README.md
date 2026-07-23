@@ -111,7 +111,19 @@ if manifest.Polyglot() {
 }
 ```
 
-Multiple `Kind` values fold into a single `Language` when the underlying runtime is shared: `rust-crate` and `rust-workspace` both report `rust`; `dotnet-project` and `dotnet-solution` both report `dotnet`; `cmake-project`, `make-project`, and `c-source-tree` all report `c`. `Component.Kind` remains the source of truth for finer-grained inspection.
+Multiple `Kind` values fold into a single `Language` when the underlying runtime is shared. `Component.Kind` remains the source of truth for finer-grained inspection.
+
+| `Language`           | Value          | Sourced from `Kind` values                                       |
+|----------------------|----------------|------------------------------------------------------------------|
+| `LanguageGo`         | `"go"`         | `go-module`                                                      |
+| `LanguageRust`       | `"rust"`       | `rust-crate`, `rust-workspace`                                   |
+| `LanguagePython`     | `"python"`     | `python-package`                                                 |
+| `LanguageJavaScript` | `"javascript"` | `node-package`                                                   |
+| `LanguageDotNet`     | `"dotnet"`     | `dotnet-project`, `dotnet-solution`                              |
+| `LanguageJava`       | `"java"`       | `java-project` (Maven / Gradle / Ant)                            |
+| `LanguageC`          | `"c"`          | `cmake-project`, `make-project`, `c-source-tree`                 |
+| `LanguageAssembly`   | `"assembly"`   | `asm-source-tree`                                                |
+| `LanguageUnknown`    | `"unknown"`    | any `Kind` not in the table above (safety net for new detectors) |
 
 ## Configuration
 
