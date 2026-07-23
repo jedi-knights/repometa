@@ -30,16 +30,21 @@ func (rustDetector) detect(dv dirVisit, cfg options) []finding {
 	if err != nil {
 		return []finding{{
 			Kind:       KindRustCrate,
-			Confidence: 0.8,
-			Evidence:   []Evidence{{Path: relJoin(dv.rel, "Cargo.toml"), Reason: "Cargo.toml unreadable: " + err.Error()}},
+			Confidence: confidenceUnreadable,
+			Evidence:   []Evidence{evidenceUnreadable(dv.rel, "Cargo.toml", err)},
 		}}
 	}
 
 	var manifest cargoTOML
 	if err := toml.Unmarshal(data, &manifest); err != nil {
+		// Rust keeps its own bespoke parse-failure Evidence rather than
+		// using evidenceUnparsable: BurntSushi/toml's error text is noisy
+		// and the historical Evidence line omits it entirely. Preserve
+		// current behavior — bring this into the shared helper only if
+		// consumers ask for the extra detail.
 		return []finding{{
 			Kind:       KindRustCrate,
-			Confidence: 0.7,
+			Confidence: confidenceUnparsable,
 			Evidence:   []Evidence{{Path: relJoin(dv.rel, "Cargo.toml"), Reason: "Cargo.toml at directory root (parse error)"}},
 		}}
 	}

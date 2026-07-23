@@ -45,19 +45,13 @@ func (pythonDetector) detect(dv dirVisit, cfg options) []finding {
 		data, err := readManifest(filepath.Join(dv.abs, "pyproject.toml"), cfg)
 		switch {
 		case err != nil:
-			confidence = 0.8
-			evidence = append(evidence, Evidence{
-				Path:   relJoin(dv.rel, "pyproject.toml"),
-				Reason: "pyproject.toml unreadable: " + err.Error(),
-			})
+			confidence = confidenceUnreadable
+			evidence = append(evidence, evidenceUnreadable(dv.rel, "pyproject.toml", err))
 		default:
 			var pp pyprojectTOML
 			if uerr := toml.Unmarshal(data, &pp); uerr != nil {
-				confidence = 0.7
-				evidence = append(evidence, Evidence{
-					Path:   relJoin(dv.rel, "pyproject.toml"),
-					Reason: "pyproject.toml parse error: " + uerr.Error(),
-				})
+				confidence = confidenceUnparsable
+				evidence = append(evidence, evidenceUnparsable(dv.rel, "pyproject.toml", uerr))
 				break
 			}
 			if pp.Tool.Uv != nil && pp.Tool.Uv.Workspace != nil {

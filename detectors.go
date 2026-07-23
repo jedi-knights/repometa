@@ -97,6 +97,40 @@ func relJoin(dir, name string) string {
 	return dir + "/" + name
 }
 
+// Confidence values used when a manifest file is present but its
+// contents could not be fully interpreted. The gradation reflects how
+// much the detector still knows: an unreadable file (stat succeeded but
+// open/read failed, or the size cap fired) means we saw the file existed
+// but couldn't inspect its contents at all; an unparsable file means we
+// did read the bytes but the unmarshaler rejected them. The component
+// is still reported in both cases — its presence is a real signal — but
+// downstream consumers get a hint that the shape data is missing.
+const (
+	confidenceUnreadable = 0.8
+	confidenceUnparsable = 0.7
+)
+
+// evidenceUnreadable formats the Evidence entry used when readManifest
+// returns an error. The filename is repeated in Path and Reason so a
+// consumer scanning Evidence text for a specific manifest can match on
+// either field.
+func evidenceUnreadable(rel, filename string, err error) Evidence {
+	return Evidence{
+		Path:   relJoin(rel, filename),
+		Reason: filename + " unreadable: " + err.Error(),
+	}
+}
+
+// evidenceUnparsable formats the Evidence entry used when a detector's
+// unmarshaler rejects the read bytes. Mirrors [evidenceUnreadable]'s
+// shape so the two cases are visually parallel in Evidence output.
+func evidenceUnparsable(rel, filename string, err error) Evidence {
+	return Evidence{
+		Path:   relJoin(rel, filename),
+		Reason: filename + " parse error: " + err.Error(),
+	}
+}
+
 // readManifest reads a file at path, capped at cfg.maxFileSize. On
 // failure it returns nil and an error explaining the reason (stat
 // failure, size cap exceeded, or read failure) so callers can attribute

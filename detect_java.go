@@ -68,19 +68,13 @@ func detectMaven(dv dirVisit, cfg options) finding {
 	data, err := readManifest(filepath.Join(dv.abs, "pom.xml"), cfg)
 	switch {
 	case err != nil:
-		confidence = 0.8
-		evidence = append(evidence, Evidence{
-			Path:   relJoin(dv.rel, "pom.xml"),
-			Reason: "pom.xml unreadable: " + err.Error(),
-		})
+		confidence = confidenceUnreadable
+		evidence = append(evidence, evidenceUnreadable(dv.rel, "pom.xml", err))
 	default:
 		var pom mavenPom
 		if uerr := xml.Unmarshal(data, &pom); uerr != nil {
-			confidence = 0.7
-			evidence = append(evidence, Evidence{
-				Path:   relJoin(dv.rel, "pom.xml"),
-				Reason: "pom.xml parse error: " + uerr.Error(),
-			})
+			confidence = confidenceUnparsable
+			evidence = append(evidence, evidenceUnparsable(dv.rel, "pom.xml", uerr))
 		} else if len(pom.Modules.Module) > 0 {
 			workspaces = append(workspaces, Workspace{
 				Kind:    WorkspaceMavenMultiModule,

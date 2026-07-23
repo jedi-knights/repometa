@@ -33,19 +33,13 @@ func (jsDetector) detect(dv dirVisit, cfg options) []finding {
 	data, err := readManifest(filepath.Join(dv.abs, "package.json"), cfg)
 	switch {
 	case err != nil:
-		confidence = 0.8
-		evidence = append(evidence, Evidence{
-			Path:   relJoin(dv.rel, "package.json"),
-			Reason: "package.json unreadable: " + err.Error(),
-		})
+		confidence = confidenceUnreadable
+		evidence = append(evidence, evidenceUnreadable(dv.rel, "package.json", err))
 	default:
 		var pkg packageJSON
 		if uerr := json.Unmarshal(data, &pkg); uerr != nil {
-			confidence = 0.7
-			evidence = append(evidence, Evidence{
-				Path:   relJoin(dv.rel, "package.json"),
-				Reason: "package.json parse error: " + uerr.Error(),
-			})
+			confidence = confidenceUnparsable
+			evidence = append(evidence, evidenceUnparsable(dv.rel, "package.json", uerr))
 			break
 		}
 		if fw := detectJSFramework(pkg); fw != "" {
