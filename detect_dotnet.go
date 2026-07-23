@@ -30,7 +30,18 @@ func (dotnetDetector) detect(dv dirVisit, cfg options) []finding {
 
 		switch ext {
 		case ".sln":
+			// A .sln is the Visual Studio solution format used across
+			// every MSBuild language (C#, F#, VB, and C++). We only
+			// emit dotnet-solution when the .sln references at least
+			// one .NET project file — a pure-C++ solution or one whose
+			// projects are all solution folders is not a .NET workspace
+			// and should not be labeled as such. The C++ projects it
+			// does contain still surface as cpp-project components at
+			// their own directories.
 			members := parseSlnMembers(filepath.Join(dv.abs, name), cfg)
+			if len(members) == 0 {
+				continue
+			}
 			out = append(out, finding{
 				Kind:       KindDotNetSolution,
 				Confidence: 1.0,
@@ -55,6 +66,21 @@ func (dotnetDetector) detect(dv dirVisit, cfg options) []finding {
 				Attributes: map[string]string{
 					"dotnet.language": dotnetLanguageFor(ext),
 				},
+			})
+
+		case ".vcxproj":
+			// Visual Studio C++ project. Shares the MSBuild machinery
+			// with .csproj but targets native C/C++ code, so it maps to
+			// LanguageC in the polyglot classifier and suppresses loose
+			// C-source detection inside the same directory (see
+			// isCBuildKind in scan.go).
+			out = append(out, finding{
+				Kind:       KindCppProject,
+				Confidence: 1.0,
+				Evidence: []Evidence{{
+					Path:   relJoin(dv.rel, name),
+					Reason: ".vcxproj project file",
+				}},
 			})
 		}
 	}

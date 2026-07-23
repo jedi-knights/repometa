@@ -45,7 +45,8 @@ v0 — API is unstable and will break without notice. This library exists to unb
 | Rust | `rust-crate`, `rust-workspace` | `cargo-workspace` |
 | Python | `python-package` | `uv-workspace` |
 | Node / JS / TS | `node-package` | `npm-yarn-workspace`, `pnpm-workspace`, `nx`, `turborepo` |
-| .NET | `dotnet-project` (`.csproj` / `.fsproj` / `.vbproj`), `dotnet-solution` (`.sln`) | `dotnet-solution` |
+| .NET | `dotnet-project` (`.csproj` / `.fsproj` / `.vbproj`), `dotnet-solution` (`.sln` with at least one .NET member) | `dotnet-solution` |
+| Visual C++ | `cpp-project` (`.vcxproj`) | — |
 | Java / JVM | `java-project` (Maven `pom.xml`, Gradle `build.gradle{,.kts}` / `settings.gradle{,.kts}`, Ant `build.xml`) | `maven-multi-module`, `gradle-multi-project` |
 | CMake | `cmake-project` | — |
 | Make | `make-project` | — |
@@ -121,7 +122,7 @@ Multiple `Kind` values fold into a single `Language` when the underlying runtime
 | `LanguageJavaScript` | `"javascript"` | `node-package`                                                   |
 | `LanguageDotNet`     | `"dotnet"`     | `dotnet-project`, `dotnet-solution`                              |
 | `LanguageJava`       | `"java"`       | `java-project` (Maven / Gradle / Ant)                            |
-| `LanguageC`          | `"c"`          | `cmake-project`, `make-project`, `c-source-tree`                 |
+| `LanguageC`          | `"c"`          | `cmake-project`, `make-project`, `cpp-project`, `c-source-tree`  |
 | `LanguageAssembly`   | `"assembly"`   | `asm-source-tree`                                                |
 | `LanguageUnknown`    | `"unknown"`    | any `Kind` not in the table above (safety net for new detectors) |
 

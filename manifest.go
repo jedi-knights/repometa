@@ -34,6 +34,7 @@ const (
 	KindNodePackage    Kind = "node-package"
 	KindDotNetProject  Kind = "dotnet-project"
 	KindDotNetSolution Kind = "dotnet-solution"
+	KindCppProject     Kind = "cpp-project"
 	KindJavaProject    Kind = "java-project"
 	KindCMakeProject   Kind = "cmake-project"
 	KindMakeProject    Kind = "make-project"
@@ -155,7 +156,7 @@ func (c Component) Language() Language {
 		return LanguageDotNet
 	case KindJavaProject:
 		return LanguageJava
-	case KindCMakeProject, KindMakeProject, KindCSource:
+	case KindCMakeProject, KindMakeProject, KindCppProject, KindCSource:
 		return LanguageC
 	case KindAsmSource:
 		return LanguageAssembly

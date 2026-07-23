@@ -20,6 +20,7 @@ func TestComponentLanguageMapping(t *testing.T) {
 		{KindJavaProject, LanguageJava},
 		{KindCMakeProject, LanguageC},
 		{KindMakeProject, LanguageC},
+		{KindCppProject, LanguageC},
 		{KindCSource, LanguageC},
 		{KindAsmSource, LanguageAssembly},
 		{Kind("something-nobody-added"), LanguageUnknown},

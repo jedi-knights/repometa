@@ -123,13 +123,16 @@ EndGlobal
 	}
 }
 
-func TestParseSlnMembersHandlesEmptyAndUnreadable(t *testing.T) {
+func TestParseSlnMembersHandlesUnreadable(t *testing.T) {
 	// Unreadable file returns nil rather than panicking.
 	if got := parseSlnMembers("/no/such/file.sln", defaultOptions()); got != nil {
 		t.Errorf("expected nil for missing file, got %v", got)
 	}
+}
 
-	// A .sln with no Project(...) lines returns nil.
+func TestScanSkipsEmptySolutionEmission(t *testing.T) {
+	// A .sln with no Project(...) lines is not a .NET workspace — no
+	// dotnet-solution component should be emitted for it.
 	root := t.TempDir()
 	buildFixture(t, root, map[string]string{
 		"Empty.sln": "Microsoft Visual Studio Solution File, Format Version 12.00\nGlobal\nEndGlobal\n",
@@ -138,11 +141,60 @@ func TestParseSlnMembersHandlesEmptyAndUnreadable(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Scan: %v", err)
 	}
-	sln := findComponent(m.Components, ".", KindDotNetSolution)
-	if sln == nil {
-		t.Fatalf("expected dotnet-solution")
+	if sln := findComponent(m.Components, ".", KindDotNetSolution); sln != nil {
+		t.Errorf("empty .sln should not produce dotnet-solution, got %+v", sln)
 	}
-	if len(sln.Workspaces[0].Members) != 0 {
-		t.Errorf("expected empty members for empty .sln, got %v", sln.Workspaces[0].Members)
+}
+
+func TestScanDetectsVCXProject(t *testing.T) {
+	// A .vcxproj declares a Visual Studio C++ project — surfaces as
+	// KindCppProject, buckets into LanguageC in the polyglot classifier.
+	root := t.TempDir()
+	buildFixture(t, root, map[string]string{
+		"Native.vcxproj": `<?xml version="1.0"?><Project><ItemGroup><ClCompile Include="main.cpp"/></ItemGroup></Project>`,
+		"main.cpp":       "int main(){return 0;}\n",
+	})
+	m, err := Scan(root)
+	if err != nil {
+		t.Fatalf("Scan: %v", err)
+	}
+	c := findComponent(m.Components, ".", KindCppProject)
+	if c == nil {
+		t.Fatalf("expected cpp-project at root; components=%+v", m.Components)
+	}
+	if c.Language() != LanguageC {
+		t.Errorf("cpp-project should bucket to LanguageC, got %q", c.Language())
+	}
+	// Loose C source suppression should hide the c-source-tree finding
+	// that would otherwise fire on main.cpp.
+	if findComponent(m.Components, ".", KindCSource) != nil {
+		t.Errorf("c-source-tree under cpp-project should have been suppressed")
+	}
+}
+
+func TestScanCppOnlySolutionEmitsNoDotNetSolution(t *testing.T) {
+	// Reproduces the VSNvim shape found in the live smoke test: a .sln
+	// whose only Project(...) reference is a .vcxproj. The solution
+	// itself is not a .NET workspace and should not emit dotnet-solution,
+	// but the C++ project should surface as cpp-project.
+	root := t.TempDir()
+	buildFixture(t, root, map[string]string{
+		"Native.sln": `Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Native", "Native\Native.vcxproj", "{11111111-1111-1111-1111-111111111111}"
+EndProject
+Global
+EndGlobal
+`,
+		"Native/Native.vcxproj": `<?xml version="1.0"?><Project></Project>`,
+	})
+	m, err := Scan(root)
+	if err != nil {
+		t.Fatalf("Scan: %v", err)
+	}
+	if sln := findComponent(m.Components, ".", KindDotNetSolution); sln != nil {
+		t.Errorf("pure-C++ .sln should not emit dotnet-solution, got %+v", sln)
+	}
+	if cpp := findComponent(m.Components, "Native", KindCppProject); cpp == nil {
+		t.Errorf("expected cpp-project at Native; got components=%+v", m.Components)
 	}
 }

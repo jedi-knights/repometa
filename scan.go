@@ -109,7 +109,7 @@ func isLooseSource(k Kind) bool {
 }
 
 func isCBuildKind(k Kind) bool {
-	return k == KindCMakeProject || k == KindMakeProject
+	return k == KindCMakeProject || k == KindMakeProject || k == KindCppProject
 }
 
 // coveredBy reports whether path equals, or is a proper descendant of,
