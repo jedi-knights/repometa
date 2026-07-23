@@ -31,6 +31,8 @@ func allDetectors() []detector {
 		rustDetector{},
 		pythonDetector{},
 		jsDetector{},
+		dotnetDetector{},
+		javaDetector{},
 		cmakeDetector{},
 		makeDetector{},
 		cDetector{},

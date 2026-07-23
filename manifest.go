@@ -25,15 +25,18 @@ type Kind string
 // Kind values for every ecosystem detector shipped in this package. See
 // the README's "Supported detectors" table for the mapping to ecosystem.
 const (
-	KindGoModule      Kind = "go-module"
-	KindRustCrate     Kind = "rust-crate"
-	KindRustWorkspace Kind = "rust-workspace"
-	KindPythonPackage Kind = "python-package"
-	KindNodePackage   Kind = "node-package"
-	KindCMakeProject  Kind = "cmake-project"
-	KindMakeProject   Kind = "make-project"
-	KindCSource       Kind = "c-source-tree"
-	KindAsmSource     Kind = "asm-source-tree"
+	KindGoModule       Kind = "go-module"
+	KindRustCrate      Kind = "rust-crate"
+	KindRustWorkspace  Kind = "rust-workspace"
+	KindPythonPackage  Kind = "python-package"
+	KindNodePackage    Kind = "node-package"
+	KindDotNetProject  Kind = "dotnet-project"
+	KindDotNetSolution Kind = "dotnet-solution"
+	KindJavaProject    Kind = "java-project"
+	KindCMakeProject   Kind = "cmake-project"
+	KindMakeProject    Kind = "make-project"
+	KindCSource        Kind = "c-source-tree"
+	KindAsmSource      Kind = "asm-source-tree"
 )
 
 // Component describes a single buildable unit inside the repo, anchored
@@ -96,13 +99,16 @@ type WorkspaceKind string
 // WorkspaceKind values for every workspace layout recognized by the
 // detectors in this package.
 const (
-	WorkspaceGo        WorkspaceKind = "go-workspace"
-	WorkspaceCargo     WorkspaceKind = "cargo-workspace"
-	WorkspaceNpmYarn   WorkspaceKind = "npm-yarn-workspace"
-	WorkspacePnpm      WorkspaceKind = "pnpm-workspace"
-	WorkspaceNx        WorkspaceKind = "nx"
-	WorkspaceTurborepo WorkspaceKind = "turborepo"
-	WorkspaceUv        WorkspaceKind = "uv-workspace"
+	WorkspaceGo                 WorkspaceKind = "go-workspace"
+	WorkspaceCargo              WorkspaceKind = "cargo-workspace"
+	WorkspaceNpmYarn            WorkspaceKind = "npm-yarn-workspace"
+	WorkspacePnpm               WorkspaceKind = "pnpm-workspace"
+	WorkspaceNx                 WorkspaceKind = "nx"
+	WorkspaceTurborepo          WorkspaceKind = "turborepo"
+	WorkspaceUv                 WorkspaceKind = "uv-workspace"
+	WorkspaceDotNetSolution     WorkspaceKind = "dotnet-solution"
+	WorkspaceMavenMultiModule   WorkspaceKind = "maven-multi-module"
+	WorkspaceGradleMultiProject WorkspaceKind = "gradle-multi-project"
 )
 
 // ScanStats reports counters from the walk. Non-zero DepthCapHits or

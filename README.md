@@ -33,6 +33,8 @@ v0 — API is unstable and will break without notice. This library exists to unb
 - Per-ecosystem detectors returning typed component and workspace records.
 - Framework attributes on `node-package` (`js.framework=nextjs`, `js.framework=angular`).
 - Package-manager attributes on `python-package` (`python.pm={uv,poetry,pipenv,pip}`).
+- Language attribute on `dotnet-project` (`dotnet.language={csharp,fsharp,vb}`).
+- Build-system attribute on `java-project` (`java.build={maven,gradle,ant}`); Gradle DSL variant via `java.gradle.dsl={groovy,kotlin}`.
 - Configurable bounds (max depth, max directories visited, max file size read) via `Option` functions.
 
 ### Supported detectors (v0)
@@ -43,6 +45,8 @@ v0 — API is unstable and will break without notice. This library exists to unb
 | Rust | `rust-crate`, `rust-workspace` | `cargo-workspace` |
 | Python | `python-package` | `uv-workspace` |
 | Node / JS / TS | `node-package` | `npm-yarn-workspace`, `pnpm-workspace`, `nx`, `turborepo` |
+| .NET | `dotnet-project` (`.csproj` / `.fsproj` / `.vbproj`), `dotnet-solution` (`.sln`) | `dotnet-solution` |
+| Java / JVM | `java-project` (Maven `pom.xml`, Gradle `build.gradle{,.kts}` / `settings.gradle{,.kts}`, Ant `build.xml`) | `maven-multi-module`, `gradle-multi-project` |
 | CMake | `cmake-project` | — |
 | Make | `make-project` | — |
 | C | `c-source-tree` (only when no structured build system) | — |
