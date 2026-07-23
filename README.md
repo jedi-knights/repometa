@@ -9,28 +9,7 @@ A Go library that scans a source repository and reports the components (buildabl
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://www.conventionalcommits.org/en/v1.0.0/)
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Usage](#usage)
-- [API Documentation](#api-documentation)
-- [Configuration](#configuration)
-- [Development](#development)
-- [Testing](#testing)
-- [Roadmap](#roadmap)
-- [Releases](#releases)
-- [Versioning](#versioning)
-- [Changelog](#changelog)
-- [Contributing](#contributing)
-- [Code of Conduct](#code-of-conduct)
-- [Security](#security)
-- [Support](#support)
-- [Acknowledgments](#acknowledgments)
-- [Maintainers](#maintainers)
-- [License](#license)
+[Installation](#installation) · [Usage](#usage) · [Configuration](#configuration) · [Development](#development) · [Releases](#releases) · [Contributing](#contributing) · [License](#license)
 
 ## Overview
 
