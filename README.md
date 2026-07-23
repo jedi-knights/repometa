@@ -7,7 +7,6 @@ A Go library that scans a source repository and reports the components (buildabl
 [![Badge](https://github.com/jedi-knights/repometa/actions/workflows/badge.yaml/badge.svg)](https://github.com/jedi-knights/repometa/actions/workflows/badge.yaml)
 [![Coverage](https://img.shields.io/badge/Coverage-68.1%25-yellow)](https://jedi-knights.github.io/repometa/?v=3)
 [![Go Reference](https://pkg.go.dev/badge/github.com/jedi-knights/repometa.svg)](https://pkg.go.dev/github.com/jedi-knights/repometa)
-[![Go Report Card](https://goreportcard.com/badge/github.com/jedi-knights/repometa)](https://goreportcard.com/report/github.com/jedi-knights/repometa)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://www.conventionalcommits.org/en/v1.0.0/)
 
