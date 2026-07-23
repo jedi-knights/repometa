@@ -2,8 +2,10 @@
 
 A Go library that scans a source repository and reports the components (buildable units) it contains, plus any monorepo workspace layouts it recognizes.
 
-![CI](https://github.com/jedi-knights/repometa/actions/workflows/ci.yml/badge.svg)
-![Release](https://github.com/jedi-knights/repometa/actions/workflows/release.yml/badge.svg)
+[![CI](https://github.com/jedi-knights/repometa/actions/workflows/ci.yml/badge.svg)](https://github.com/jedi-knights/repometa/actions/workflows/ci.yml)
+[![Release](https://github.com/jedi-knights/repometa/actions/workflows/release.yml/badge.svg)](https://github.com/jedi-knights/repometa/actions/workflows/release.yml)
+[![Badge](https://github.com/jedi-knights/repometa/actions/workflows/badge.yaml/badge.svg)](https://github.com/jedi-knights/repometa/actions/workflows/badge.yaml)
+[![Coverage](https://img.shields.io/badge/Coverage-unknown-lightgrey)](https://jedi-knights.github.io/repometa/)
 [![Go Reference](https://pkg.go.dev/badge/github.com/jedi-knights/repometa.svg)](https://pkg.go.dev/github.com/jedi-knights/repometa)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jedi-knights/repometa)](https://goreportcard.com/report/github.com/jedi-knights/repometa)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
